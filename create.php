@@ -9,7 +9,6 @@ if (isset($_POST['submit'])) {
     $phone = $_POST['phone'];
     $event_name = $_POST['event_name'];
     $registration_fee = $_POST['registration_fee'];
-    $registered_at = str_replace("T", " ", $_POST['registered_at']);
 
     // PASSWORD HASHING
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -26,27 +25,38 @@ if (isset($_POST['submit'])) {
         exit;
     }
 
+    // Check for duplicate email
+    $check = $conn->prepare("SELECT 1 FROM registrations WHERE email = ?");
+    $check->bind_param("s", $email);
+    $check->execute();
+    $check->store_result();
+    if ($check->num_rows > 0) {
+        echo "<p style='color:red; text-align:center;'>Email already exists</p>";
+        $check->close();
+        exit;
+    }
+    $check->close();
+
     $stmt = $conn->prepare(
         "INSERT INTO registrations 
-        (full_name, email, phone, event_name, registration_fee, registered_at, password)
-        VALUES (?, ?, ?, ?, ?, ?, ?)"
+        (full_name, email, phone, event_name, registration_fee, password)
+        VALUES (?, ?, ?, ?, ?, ?)"
     );
 
     $stmt->bind_param(
-        "ssssdss",
+        "ssssds",
         $full_name,
         $email,
         $phone,
         $event_name,
         $registration_fee,
-        $registered_at,
         $password
     );
 
     if ($stmt->execute()) {
         echo "<p style='color:green; text-align:center;'>Data added successfully!</p>";
     } else {
-        echo "<p style='color:red; text-align:center;'>Error saving data</p>";
+        echo "<p style='color:red; text-align:center;'>Error: " . $stmt->error . "</p>";
     }
 
     $stmt->close();
@@ -77,9 +87,6 @@ if (isset($_POST['submit'])) {
 
     <label>Registration Fee:</label>
     <input type="number" name="registration_fee" step="0.01" min="0" required><br><br>
-
-    <label>Registered At:</label>
-    <input type="datetime-local" name="registered_at" required><br><br>
 
     <button type="submit" name="submit">Submit</button>
 </form>

@@ -1,0 +1,32 @@
+
+/* Global */
+body {
+    font-family: Arial, sans-serif;
+    padding: 5px;
+    margin: 0;
+}
+
+button {
+    background: #4CAF50;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 15px;
+}
+
+button:hover {
+    background: #45a049;
+}
+
+/* Messages */
+.success {
+    color: green;
+    text-align: center;
+}
+
+.error {
+    color: red;
+    text-align: center;
+}
